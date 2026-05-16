@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AU Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --c1:#C07088;
+  --c2:#7090C0;
+  --bg:#FAF0F2;
+  --card:#FFFFFF;
+  --border:#F0C8D4;
+  --text:#2C2220;
+  --sub:#B09898;
+  --accent:#E8B4C0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);
+  min-height:100vh;
+  padding:40px 20px 100px;
+  transition:background .4s;
+}
+
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:radial-gradient(circle, rgba(200,140,160,.12) 1px, transparent 1px);
+  background-size:22px 22px;
+  pointer-events:none;z-index:0;
+}
+body.no-pattern::before{display:none}
+
+/* toolbar */
+.toolbar{
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(14px);
+  border-top:1px solid #F0DDE2;
+  display:flex;align-items:center;justify-content:center;
+  gap:6px;padding:11px 20px;z-index:200;flex-wrap:wrap;
+}
+.tb-group{display:flex;align-items:center;gap:6px}
+.tb-sep{width:1px;height:20px;background:#ECD8DC;margin:0 8px}
+.tb-label{font-size:10.5px;color:var(--sub);letter-spacing:.4px;white-space:nowrap}
+.tb-btn{
+  height:30px;padding:0 12px;
+  border:1px solid #ECD8DC;border-radius:6px;
+  background:#fff;
+  font-family:'Noto Sans KR',sans-serif;
+  font-size:11.5px;color:var(--text);
+  cursor:pointer;transition:background .14s,border-color .14s;white-space:nowrap;
+}
+.tb-btn:hover{background:#FBF0F2;border-color:#E8C0C8}
+.tb-btn.primary{
+  background:linear-gradient(135deg,#D07888,#B068A0);
+  color:#fff;border:none;
+  box-shadow:0 2px 10px rgba(180,80,120,.2);
+}
+.tb-btn.primary:hover{opacity:.88}
+.zoom-val{font-size:11.5px;color:var(--sub);min-width:38px;text-align:center}
+
+.bg-dot{
+  width:18px;height:18px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .15s,border-color .14s;flex-shrink:0;
+}
+.bg-dot:hover{transform:scale(1.18)}
+.bg-dot.active{border-color:#888 !important}
+
+/* layout */
+.outer{max-width:820px;margin:0 auto;position:relative;z-index:1}
+.scale-wrap{transform-origin:top center}
+
+/* card */
+#capture{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:18px;overflow:hidden;
+}
+
+.card-strip{
+  height:5px;
+  background:linear-gradient(90deg,#F0B0C0,#D090B0,#B0A0D0,#A0B8D8,#90C8C0);
+}
+
+/* header */
+.hdr{padding:30px 44px 24px;border-bottom:1.5px solid #FAE8EC}
+
+.cl-title{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:400;font-style:italic;
+  color:#C06080;letter-spacing:.5px;
+  text-align:center;margin-bottom:28px;
+}
+.cl-title span{
+  font-style:normal;font-size:13px;font-weight:400;
+  font-family:'Noto Sans KR',sans-serif;
+  color:var(--sub);letter-spacing:3px;
+  display:block;text-transform:uppercase;margin-bottom:4px;
+}
+
+.couple-row{display:flex;align-items:flex-start;justify-content:center;gap:0}
+.person-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  gap:11px;flex:1;max-width:260px;
+}
+
+.avatar{
+  width:96px;height:96px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:500;color:#fff;
+  overflow:hidden;position:relative;user-select:none;
+}
+#av1{box-shadow:0 0 0 2px #fff, 0 0 0 5px var(--c1), 0 6px 20px rgba(0,0,0,.12)}
+#av2{box-shadow:0 0 0 2px #fff, 0 0 0 5px var(--c2), 0 6px 20px rgba(0,0,0,.12)}
+.avatar-init{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:500;color:#fff;z-index:1;
+}
+.avatar-img-wrap{
+  position:absolute;inset:0;overflow:hidden;border-radius:50%;display:none;z-index:2;
+}
+.avatar-img-wrap img{
+  position:absolute;transform-origin:center center;cursor:grab;
+  will-change:transform;width:100%;height:100%;object-fit:cover;
+}
+.avatar-img-wrap img:active{cursor:grabbing}
+.avatar-btn{
+  position:absolute;bottom:0;left:0;right:0;height:26px;
+  background:rgba(0,0,0,.34);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:3;
+  font-size:10px;letter-spacing:.5px;color:rgba(255,255,255,.9);
+  transition:background .15s;
+}
+.avatar-btn:hover{background:rgba(0,0,0,.46)}
+.photo-input{display:none}
+
+.name-block{display:flex;flex-direction:column;align-items:center;gap:9px;width:100%}
+.name-in{
+  border:none;border-bottom:1.5px solid #F0DCDE;
+  padding:4px 0;width:130px;
+  font-family:'Noto Sans KR',sans-serif;
+  font-size:14px;font-weight:500;
+  color:var(--text);text-align:center;
+  outline:none;background:transparent;
+  transition:border-color .2s;
+}
+.name-in:focus{border-color:var(--sub)}
+.name-in::placeholder{color:#E0D0D2}
+
+.color-row{display:flex;align-items:center;gap:6px}
+.color-label{font-size:10px;color:var(--sub);letter-spacing:.3px}
+.swatches{display:flex;gap:4px;align-items:center}
+.swatch{
+  width:14px;height:14px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .14s,border-color .14s;flex-shrink:0;
+}
+.swatch:hover{transform:scale(1.2)}
+.swatch.active{border-color:#666}
+.custom-color{
+  width:14px;height:14px;border-radius:50%;
+  border:1.5px dashed #C8B0B4;overflow:hidden;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;flex-shrink:0;
+}
+.custom-color input[type=color]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:200%;height:200%;
+}
+.custom-preview{width:8px;height:8px;border-radius:50%;pointer-events:none}
+
+.x-divider{
+  font-size:15px;font-weight:300;color:#D8C0C4;
+  flex-shrink:0;margin:0 24px;padding-top:20px;
+  font-family:'Playfair Display',serif;
+}
+
+.legend{
+  display:flex;justify-content:center;gap:26px;
+  margin-top:18px;padding-top:16px;
+  border-top:1px dashed #F0DDE0;
+}
+.leg{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--sub)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* AU selector */
+.au-selector{
+  padding:20px 44px 22px;
+  border-bottom:1.5px solid #FAE8EC;
+  background:linear-gradient(180deg,rgba(250,232,236,.3),transparent);
+}
+.au-sel-label{
+  font-size:10px;font-weight:500;letter-spacing:2px;
+  color:var(--sub);text-align:center;
+  text-transform:uppercase;margin-bottom:12px;
+}
+.au-toggles{
+  display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
+}
+.au-toggle{
+  padding:7px 16px;border-radius:20px;
+  border:1.5px solid #F0DDE2;background:#fff;
+  font-family:'Noto Sans KR',sans-serif;
+  font-size:12px;color:var(--sub);
+  cursor:pointer;transition:all .18s;
+  white-space:nowrap;user-select:none;
+  display:flex;align-items:center;gap:7px;
+}
+.au-toggle:hover{border-color:#E0B0C0}
+.au-toggle .au-icon{font-size:13px}
+.au-toggle.on{
+  background:linear-gradient(135deg,#FFE3EC,#EED9F5);
+  border-color:#D8A0B8;
+  color:#9A4060;font-weight:500;
+}
+
+/* body */
+.body{padding:26px 40px 34px}
+
+.au-section{margin-bottom:32px}
+.au-section:last-child{margin-bottom:0}
+.au-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:8px;
+  border-bottom:1px dashed #F0DDE0;
+}
+.au-title{
+  font-family:'Playfair Display',serif;
+  font-size:18px;font-weight:400;font-style:italic;
+  color:#B05878;letter-spacing:.5px;
+}
+.au-sub{
+  font-size:10px;letter-spacing:1.5px;
+  color:var(--sub);text-transform:uppercase;
+}
+
+.cat{margin-bottom:20px}
+.cat:last-child{margin-bottom:0}
+.cat-hdr{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.cat-label{
+  font-size:10px;font-weight:500;letter-spacing:2px;
+  text-transform:uppercase;white-space:nowrap;color:#C890A0;
+}
+.cat-line{flex:1;height:1px;background:linear-gradient(90deg,#F0C8D0,transparent)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;column-gap:4px;row-gap:0}
+.item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:5px 8px;border-radius:7px;transition:background .12s;
+}
+.item:hover{background:#FDF5F6}
+.item-txt{font-size:12.5px;color:#3C2A2E;font-weight:300;flex:1;line-height:1.5}
+.dots{display:flex;gap:5px;margin-left:8px;flex-shrink:0}
+.dot{
+  width:13px;height:13px;border-radius:50%;
+  border:1.5px solid;cursor:pointer;
+  transition:transform .12s,background .14s;flex-shrink:0;
+}
+.dot:hover{transform:scale(1.3)}
+.dot.d1{border-color:var(--c1)}
+.dot.d1.on{background:var(--c1)}
+.dot.d2{border-color:var(--c2)}
+.dot.d2.on{background:var(--c2)}
+
+.empty-msg{
+  text-align:center;color:var(--sub);
+  font-size:12.5px;padding:40px 20px;
+  font-style:italic;
+}
+
+.card-footer{
+  padding:14px 40px;
+  border-top:1px dashed #F0DDE0;
+  display:flex;justify-content:center;
+}
+.footer-txt{font-size:10px;color:#D8C0C4;letter-spacing:1.5px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="outer">
+  <div class="scale-wrap" id="scaleWrap">
+    <div id="capture">
+      <div class="card-strip" id="strip"></div>
+
+      <div class="hdr">
+        <div class="cl-title">
+          <span>another universe</span>
+          AU Checklist
+        </div>
+
+        <div class="couple-row">
+          <div class="person-wrap">
+            <div class="avatar" id="av1" style="background:var(--c1)">
+              <label for="ph1" id="init1" class="avatar-init" style="cursor:pointer">?</label>
+              <div class="avatar-img-wrap" id="iw1"><img id="pi1" draggable="false"></div>
+              <label for="ph1" class="avatar-btn" id="ab1" style="display:none">사진 변경</label>
+            </div>
+            <input type="file" accept="image/*" id="ph1" class="photo-input" onchange="loadPhoto(1)">
+            <div class="name-block">
+              <input class="name-in" id="n1" placeholder="이름 입력" maxlength="12" oninput="syncPerson(1)">
+              <div class="color-row">
+                <span class="color-label">컬러</span>
+                <div class="swatches" id="sw1"></div>
+                <div class="custom-color">
+                  <div class="custom-preview" id="cp1"></div>
+                  <input type="color" id="cc1" value="#C07088" oninput="setCustom(1,this.value)">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="x-divider">×</div>
+          <div class="person-wrap">
+            <div class="avatar" id="av2" style="background:var(--c2)">
+              <label for="ph2" id="init2" class="avatar-init" style="cursor:pointer">?</label>
+              <div class="avatar-img-wrap" id="iw2"><img id="pi2" draggable="false"></div>
+              <label for="ph2" class="avatar-btn" id="ab2" style="display:none">사진 변경</label>
+            </div>
+            <input type="file" accept="image/*" id="ph2" class="photo-input" onchange="loadPhoto(2)">
+            <div class="name-block">
+              <input class="name-in" id="n2" placeholder="이름 입력" maxlength="12" oninput="syncPerson(2)">
+              <div class="color-row">
+                <span class="color-label">컬러</span>
+                <div class="swatches" id="sw2"></div>
+                <div class="custom-color">
+                  <div class="custom-preview" id="cp2"></div>
+                  <input type="color" id="cc2" value="#7090C0" oninput="setCustom(2,this.value)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="leg"><div class="leg-dot" id="ld1" style="background:var(--c1)"></div><span id="lg1">Person 1</span></div>
+          <div class="leg"><div class="leg-dot" id="ld2" style="background:var(--c2)"></div><span id="lg2">Person 2</span></div>
+        </div>
+      </div>
+
+      <!-- AU selector -->
+      <div class="au-selector" id="auSelector">
+        <div class="au-sel-label">select universe</div>
+        <div class="au-toggles" id="auToggles"></div>
+      </div>
+
+      <div class="body" id="body"></div>
+
+      <div class="card-footer"><span class="footer-txt">across all universes</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="tb-group">
+    <span class="tb-label">배경</span>
+    <div id="bgSwatches" style="display:flex;gap:5px;align-items:center"></div>
+  </div>
+  <div class="tb-sep"></div>
+  <div class="tb-group">
+    <span class="tb-label">크기</span>
+    <button class="tb-btn" onclick="dz(-0.1)">−</button>
+    <span class="zoom-val" id="zv">100%</span>
+    <button class="tb-btn" onclick="dz(0.1)">+</button>
+    <button class="tb-btn" onclick="rz()">초기화</button>
+  </div>
+  <div class="tb-sep"></div>
+  <button class="tb-btn primary" onclick="saveImg()">이미지 저장</button>
+</div>
+
+<script>
+const AUS=[
+  {
+    id:'sentinel',label:'센티넬버스',icon:'🛡',
+    title:'Sentinel·verse',
+    cats:[
+      {title:'기본 설정',items:['센티넬인 사람','가이드인 사람']},
+      {title:'가이딩',items:[
+        '파트너 외에도 가이딩받을 수 있는 사람',
+        '파트너 외에도 가이딩해줄 수 있는 사람',
+        '파트너가 타인에게 가이딩받는 걸 볼 수 있는 사람',
+        '파트너가 타인을 가이딩해주는 걸 볼 수 있는 사람',
+      ]},
+      {title:'파트너십',items:[
+        '임시라고 우기면서 계속 있어준 사람',
+        '파트너 앞에서만 무너진 사람',
+        '타 센티넬의 임시 가이딩 요청을 거절한 사람',
+        '가이드 없이 나갔다가 반쯤 죽어 돌아온 사람',
+        '파트너의 위기를 느끼고 임무 중 이탈한 사람',
+      ]},
+      {title:'임무',items:[
+        '상대를 두고 혼자 임무 나갈 수 없는 사람',
+        '혼자 떠나는 상대를 보내줄 수 있는 사람',
+        '파트너가 다쳐도 임무를 계속할 수 있는 사람',
+      ]},
+    ]
+  },
+  {
+    id:'zombie',label:'좀비 아포칼립스',icon:'🧟',
+    title:'Zombie·verse',
+    cats:[
+      {title:'생존 스타일',items:[
+        '단독 행동을 선호하는 사람',
+        '낯선 사람도 일단 믿어보는 사람',
+        '낯선 사람은 일단 경계하는 사람',
+        '안전지대를 찾아 정착하고 싶은 사람',
+        '계속 이동하며 살아남으려는 사람',
+      ]},
+      {title:'생존 감각',items:[
+        '잠든 중에도 위험을 감지하는 사람',
+        '식량보다 무기를 먼저 챙기는 사람',
+      ]},
+      {title:'결단',items:[
+        '감염 여부를 숨길 수 있는 사람',
+        '타인을 죄책감 없이 희생시킬 수 있는 사람',
+        '감염된 상대를 직접 처리할 수 있는 사람',
+        '상대가 물렸을 때 도망가지 않는 사람',
+        '멘탈이 먼저 무너지는 사람',
+        '절대 포기하지 않는 사람',
+        '마지막 순간 상대를 지키고 죽는 사람',
+      ]},
+    ]
+  },
+  {
+    id:'omega',label:'오메가버스',icon:'🐺',
+    title:'Omega·verse',
+    cats:[
+      {title:'2차 성별',items:['알파인 사람','베타인 사람','오메가인 사람']},
+      {title:'본능 & 억제',items:[
+        '페로몬 억제제를 사용하는 사람',
+        '본능을 이성으로 억제하는 사람',
+        '지배 본능이 강한 사람',
+        '보호받는 것에 안도감을 느끼는 사람',
+        '상대의 페로몬에 영향받기 싫은 사람',
+        '히트 중 이성을 유지할 수 있는 사람',
+        '히트를 혼자서도 버티는 사람',
+      ]},
+      {title:'관계 & 마킹',items:[
+        '첫 히트에서 상대를 인식한 사람',
+        '마킹에 저항하는 사람',
+        '마킹을 원하지만 티 내지 않는 사람',
+        '본딩 이후 독점욕이 강해지는 사람',
+        '번식 본능보다 감정을 우선시하는 사람',
+      ]},
+    ]
+  },
+  {
+    id:'name',label:'네임버스',icon:'✍',
+    title:'Name·verse',
+    cats:[
+      {title:'이름 발견 전',items:[
+        '손목의 이름을 오래 숨겨온 사람',
+        '이름을 발견한 순간 부정했던 사람',
+        '소울메이트 제도를 믿지 않았던 사람',
+        '만나기 전부터 이름을 외워버린 사람',
+        '이름 새겨진 손목을 가리고 다니는 사람',
+        '이름을 지우려 시도한 적 있는 사람',
+      ]},
+      {title:'이름 발견 후',items:[
+        '이름을 처음 보고 찾아보려 한 사람',
+        '손목을 먼저 보여준 사람',
+        '이름을 처음 불렀을 때 굳어버린 사람',
+        '이름이 아닌 것으로 상대를 선택하려 했던 사람',
+        '이름보다 먼저 감정이 생긴 사람',
+        '이름이 바래기 시작했을 때 패닉한 사람',
+        '상대가 내 이름을 처음 불러준 순간을 기억하는 사람',
+      ]},
+    ]
+  },
+];
+
+const PALETTES={
+  1:['#C07088','#C08A5A','#9870A8','#7888B8','#70A890'],
+  2:['#7090C0','#60A8A0','#8880B8','#A87878','#88A060'],
+};
+
+const BG_PRESETS=[
+  {color:'#FAF0F2',border:'#F0C8D4',label:'rose'},
+  {color:'#FAF6F0',border:'#E8D8C4',label:'cream'},
+  {color:'#F0EEF8',border:'#D4CCE8',label:'lavender'},
+  {color:'#EFF5F0',border:'#C4DCC8',label:'sage'},
+  {color:'#F2F2F0',border:'#DCDAD4',label:'stone'},
+];
+
+let zoom=1;
+let enabledAUs={sentinel:true,zombie:true,omega:true,name:true};
+
+function blend(a,b){
+  const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const [r1,g1,b1]=p(a);const [r2,g2,b2]=p(b);
+  const r=Math.round((r1+r2)/2).toString(16).padStart(2,'0');
+  const g=Math.round((g1+g2)/2).toString(16).padStart(2,'0');
+  const bx=Math.round((b1+b2)/2).toString(16).padStart(2,'0');
+  return '#'+r+g+bx;
+}
+
+function setColor(n,hex){
+  document.documentElement.style.setProperty('--c'+n,hex);
+  document.getElementById('av'+n).style.background=hex;
+  const ld=document.getElementById('ld'+n);if(ld)ld.style.background=hex;
+  document.getElementById('av'+n).style.boxShadow=`0 0 0 2px #fff, 0 0 0 5px ${hex}, 0 6px 20px rgba(0,0,0,.12)`;
+  updateStrip();
+}
+
+function updateStrip(){
+  const c1=getComputedStyle(document.documentElement).getPropertyValue('--c1').trim();
+  const c2=getComputedStyle(document.documentElement).getPropertyValue('--c2').trim();
+  document.getElementById('strip').style.background=
+    `linear-gradient(90deg,${c1},${blend(c1,c2)},${c2})`;
+}
+
+function buildSwatches(){
+  [1,2].forEach(n=>{
+    const wrap=document.getElementById('sw'+n);
+    PALETTES[n].forEach((hex,i)=>{
+      const s=document.createElement('div');
+      s.className='swatch'+(i===0?' active':'');
+      s.style.background=hex;
+      s.onclick=()=>{
+        wrap.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));
+        s.classList.add('active');
+        setColor(n,hex);
+        document.getElementById('cc'+n).value=hex;
+        document.getElementById('cp'+n).style.background=hex;
+      };
+      wrap.appendChild(s);
+    });
+    document.getElementById('cp'+n).style.background=PALETTES[n][0];
+  });
+}
+
+function setCustom(n,hex){
+  document.getElementById('cp'+n).style.background=hex;
+  document.getElementById('sw'+n).querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));
+  setColor(n,hex);
+}
+
+function buildBgSwatches(){
+  const wrap=document.getElementById('bgSwatches');
+  BG_PRESETS.forEach((p,i)=>{
+    const s=document.createElement('div');
+    s.className='bg-dot'+(i===0?' active':'');
+    s.style.background=p.color;s.style.borderColor=p.border;s.title=p.label;
+    s.onclick=()=>{
+      wrap.querySelectorAll('.bg-dot').forEach(x=>x.classList.remove('active'));
+      s.classList.add('active');
+      document.body.style.background=p.color;
+      document.documentElement.style.setProperty('--bg',p.color);
+      document.documentElement.style.setProperty('--border',p.border);
+      document.getElementById('capture').style.borderColor=p.border;
+    };
+    wrap.appendChild(s);
+  });
+}
+
+function syncPerson(n){
+  const v=document.getElementById('n'+n).value.trim();
+  document.getElementById('init'+n).textContent=v?v.charAt(0):'?';
+  document.getElementById('lg'+n).textContent=v||'Person '+n;
+}
+
+const imgState={
+  1:{scale:1,tx:0,ty:0,dragging:false,lx:0,ly:0,pinching:false,pd:0},
+  2:{scale:1,tx:0,ty:0,dragging:false,lx:0,ly:0,pinching:false,pd:0},
+};
+
+function applyImgTransform(n){
+  const s=imgState[n];
+  document.getElementById('pi'+n).style.transform=`translate(${s.tx}px,${s.ty}px) scale(${s.scale})`;
+}
+
+function setupImgInteraction(n){
+  const wrap=document.getElementById('iw'+n);const s=imgState[n];
+  wrap.addEventListener('wheel',e=>{
+    e.preventDefault();
+    s.scale=Math.min(5,Math.max(.5,s.scale-(e.deltaY>0?-.15:.15)));
+    applyImgTransform(n);
+  },{passive:false});
+  wrap.addEventListener('mousedown',e=>{e.preventDefault();s.dragging=true;s.lx=e.clientX;s.ly=e.clientY;});
+  window.addEventListener('mousemove',e=>{
+    if(!s.dragging)return;
+    s.tx+=e.clientX-s.lx;s.ty+=e.clientY-s.ly;s.lx=e.clientX;s.ly=e.clientY;applyImgTransform(n);
+  });
+  window.addEventListener('mouseup',()=>{s.dragging=false});
+  wrap.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){s.dragging=true;s.lx=e.touches[0].clientX;s.ly=e.touches[0].clientY;}
+    else if(e.touches.length===2){s.pinching=true;s.dragging=false;s.pd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);}
+    e.preventDefault();
+  },{passive:false});
+  wrap.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===1&&s.dragging){s.tx+=e.touches[0].clientX-s.lx;s.ty+=e.touches[0].clientY-s.ly;s.lx=e.touches[0].clientX;s.ly=e.touches[0].clientY;applyImgTransform(n);}
+    else if(e.touches.length===2&&s.pinching){const nd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);s.scale=Math.min(5,Math.max(.5,s.scale*(nd/s.pd)));s.pd=nd;applyImgTransform(n);}
+  },{passive:false});
+  wrap.addEventListener('touchend',e=>{if(e.touches.length<2)s.pinching=false;if(e.touches.length===0)s.dragging=false;});
+}
+
+function loadPhoto(n){
+  const f=document.getElementById('ph'+n).files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{
+    const iw=document.getElementById('iw'+n);const img=document.getElementById('pi'+n);
+    const init=document.getElementById('init'+n);const ab=document.getElementById('ab'+n);
+    imgState[n]={scale:1,tx:0,ty:0,dragging:false,lx:0,ly:0,pinching:false,pd:0};
+    img.style.transform='';img.src=e.target.result;
+    iw.style.display='block';init.style.display='none';ab.style.display='flex';
+    setupImgInteraction(n);
+  };
+  r.readAsDataURL(f);
+}
+
+function buildToggles(){
+  const wrap=document.getElementById('auToggles');
+  wrap.innerHTML='';
+  AUS.forEach(au=>{
+    const t=document.createElement('div');
+    t.className='au-toggle'+(enabledAUs[au.id]?' on':'');
+    t.dataset.id=au.id;
+    t.innerHTML=`<span class="au-icon">${au.icon}</span><span>${au.label}</span>`;
+    t.onclick=()=>{
+      enabledAUs[au.id]=!enabledAUs[au.id];
+      t.classList.toggle('on');
+      render();
+    };
+    wrap.appendChild(t);
+  });
+}
+
+function render(){
+  const body=document.getElementById('body');body.innerHTML='';
+  const activeAUs=AUS.filter(au=>enabledAUs[au.id]);
+  if(activeAUs.length===0){
+    const m=document.createElement('div');m.className='empty-msg';
+    m.textContent='적어도 하나의 유니버스를 선택해주세요';
+    body.appendChild(m);return;
+  }
+  activeAUs.forEach(au=>{
+    const sec=document.createElement('div');sec.className='au-section';sec.dataset.auid=au.id;
+    const hdr=document.createElement('div');hdr.className='au-header';
+    const t=document.createElement('div');t.className='au-title';t.textContent=au.title;
+    const s=document.createElement('div');s.className='au-sub';s.textContent=au.label;
+    hdr.appendChild(t);hdr.appendChild(s);sec.appendChild(hdr);
+    au.cats.forEach(cat=>{
+      const cd=document.createElement('div');cd.className='cat';
+      const ch=document.createElement('div');ch.className='cat-hdr';
+      const cl=document.createElement('span');cl.className='cat-label';cl.textContent=cat.title;
+      const cli=document.createElement('div');cli.className='cat-line';
+      ch.appendChild(cl);ch.appendChild(cli);cd.appendChild(ch);
+      const g=document.createElement('div');g.className='grid';
+      cat.items.forEach(txt=>{
+        const row=document.createElement('div');row.className='item';
+        const sp=document.createElement('span');sp.className='item-txt';sp.textContent=txt;
+        const ds=document.createElement('div');ds.className='dots';
+        [1,2].forEach(p=>{
+          const d=document.createElement('div');d.className='dot d'+p;
+          d.onclick=()=>d.classList.toggle('on');ds.appendChild(d);
+        });
+        row.appendChild(sp);row.appendChild(ds);g.appendChild(row);
+      });
+      cd.appendChild(g);sec.appendChild(cd);
+    });
+    body.appendChild(sec);
+  });
+}
+
+function applyZoom(){
+  const sw=document.getElementById('scaleWrap');const cap=document.getElementById('capture');
+  sw.style.transform=`scale(${zoom})`;sw.style.transformOrigin='top center';
+  sw.style.height=(cap.offsetHeight*zoom)+'px';
+  document.getElementById('zv').textContent=Math.round(zoom*100)+'%';
+}
+function dz(d){zoom=Math.min(1.6,Math.max(0.4,+(zoom+d).toFixed(1)));applyZoom();}
+function rz(){zoom=1;applyZoom();}
+
+function getAvatarDataURL(n){
+  const iw=document.getElementById('iw'+n);const img=document.getElementById('pi'+n);const s=imgState[n];
+  if(!img.src||!img.naturalWidth||iw.style.display!=='block')return null;
+  const SIZE=96,R=6,W=SIZE*R,H=SIZE*R;
+  const c=document.createElement('canvas');c.width=W;c.height=H;
+  const ctx=c.getContext('2d');
+  ctx.beginPath();ctx.arc(W/2,H/2,W/2,0,Math.PI*2);ctx.clip();
+  const nw=img.naturalWidth,nh=img.naturalHeight;
+  const cs=Math.max(SIZE/nw,SIZE/nh);const dw=nw*cs*R,dh=nh*cs*R;
+  ctx.save();ctx.translate(W/2+s.tx*R,H/2+s.ty*R);ctx.scale(s.scale,s.scale);
+  ctx.drawImage(img,-dw/2,-dh/2,dw,dh);ctx.restore();
+  return c.toDataURL('image/png');
+}
+
+async function saveImg(){
+  if(typeof html2canvas==='undefined'){alert('라이브러리가 아직 로딩 중입니다.');return;}
+  const btn=document.querySelector('.tb-btn.primary');
+  btn.textContent='저장 중...';btn.disabled=true;
+  await document.fonts.ready;await new Promise(r=>setTimeout(r,100));
+  const sw=document.getElementById('scaleWrap');const cap=document.getElementById('capture');
+  const rootCS=getComputedStyle(document.documentElement);
+  const c1=rootCS.getPropertyValue('--c1').trim();const c2=rootCS.getPropertyValue('--c2').trim();
+  const prevTransform=sw.style.transform;const prevHeight=sw.style.height;
+  const prevWidth=cap.style.width;const prevMinWidth=cap.style.minWidth;
+  sw.style.transform='none';sw.style.height='auto';
+  cap.style.width='820px';cap.style.minWidth='820px';
+  document.body.classList.add('no-pattern');
+  const av1url=getAvatarDataURL(1);const av2url=getAvatarDataURL(2);
+  async function preload(url){if(!url)return null;return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=url;});}
+  try{await preload(av1url);await preload(av2url);}catch(e){}
+  await new Promise(r=>requestAnimationFrame(r));await new Promise(r=>setTimeout(r,100));
+  try{
+    const canvas=await html2canvas(cap,{
+      scale:3,useCORS:true,allowTaint:true,
+      backgroundColor:'#ffffff',logging:false,imageTimeout:0,
+      ignoreElements:el=>el.classList&&el.classList.contains('toolbar'),
+      onclone:(doc)=>{
+        doc.documentElement.style.setProperty('--c1',c1);
+        doc.documentElement.style.setProperty('--c2',c2);
+        const ccap=doc.getElementById('capture');
+        if(ccap)ccap.style.setProperty('box-shadow','none','important');
+        doc.querySelectorAll('img').forEach(im=>{if(!im.getAttribute('src')||im.getAttribute('src')==='')im.remove();});
+        /* strip gradient with resolved colors */
+        const strip=doc.querySelector('.card-strip');
+        if(strip){const mid=blend(c1,c2);strip.style.cssText='height:5px;background:linear-gradient(90deg,'+c1+','+mid+','+c2+')';}
+        doc.querySelectorAll('.cat-line').forEach(el=>{el.style.background='#EAD0D6'});
+        /* hide UI-only controls + AU selector */
+        doc.querySelectorAll('.color-row,.legend,.avatar-btn,#auSelector').forEach(el=>{el.style.display='none';});
+        /* dots with strict color */
+        doc.querySelectorAll('.dot.d1').forEach(d=>{
+          d.style.setProperty('border','1.5px solid '+c1,'important');
+          if(d.classList.contains('on'))d.style.setProperty('background-color',c1,'important');
+        });
+        doc.querySelectorAll('.dot.d2').forEach(d=>{
+          d.style.setProperty('border','1.5px solid '+c2,'important');
+          if(d.classList.contains('on'))d.style.setProperty('background-color',c2,'important');
+        });
+        /* avatar rings (real DOM circles) */
+        [1,2].forEach((n,i)=>{
+          const ringColor=i===0?c1:c2;
+          const cAv=doc.getElementById('av'+n);if(!cAv)return;
+          cAv.style.setProperty('box-shadow','none','important');
+          const ring=doc.createElement('div');
+          ring.style.cssText='width:108px;height:108px;border-radius:50%;background:'+ringColor+';display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:none;padding:0;margin:0';
+          const gap=doc.createElement('div');
+          gap.style.cssText='width:100px;height:100px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;box-shadow:none;padding:0;margin:0';
+          const parent=cAv.parentNode;const next=cAv.nextSibling;
+          parent.insertBefore(ring,next);
+          ring.appendChild(gap);gap.appendChild(cAv);
+        });
+        /* name inputs to divs */
+        [1,2].forEach(n=>{
+          const inp=doc.getElementById('n'+n);if(!inp)return;
+          const div=doc.createElement('div');
+          div.textContent=inp.value||('Person '+n);
+          div.style.cssText="border:none;border-bottom:1.5px solid #F0DCDE;padding:4px 6px;min-width:140px;font-family:'Noto Sans KR',sans-serif;font-size:15px;font-weight:500;color:#2C2220;text-align:center;white-space:nowrap;line-height:1.5;box-sizing:border-box;display:inline-block";
+          inp.parentNode.replaceChild(div,inp);
+        });
+        /* swap photos */
+        [1,2].forEach((n,i)=>{
+          const url=[av1url,av2url][i];const ciw=doc.getElementById('iw'+n);if(!ciw)return;
+          if(!url){ciw.innerHTML='';ciw.style.display='none';return;}
+          ciw.innerHTML='';ciw.style.display='block';
+          const cimg=doc.createElement('img');cimg.src=url;
+          cimg.style.cssText='position:absolute;top:0;left:0;width:96px;height:96px;object-fit:cover;display:block';
+          ciw.appendChild(cimg);
+          const init=doc.getElementById('init'+n);if(init)init.style.display='none';
+        });
+      },
+    });
+    const n1=document.getElementById('n1').value||'person1';
+    const n2=document.getElementById('n2').value||'person2';
+    const a=document.createElement('a');
+    a.download='au-checklist-'+n1+'x'+n2+'.png';
+    a.href=canvas.toDataURL('image/png');
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+  }catch(e){
+    alert('저장 실패: '+(e&&e.message?e.message:e));
+  }finally{
+    document.body.classList.remove('no-pattern');
+    cap.style.width=prevWidth;cap.style.minWidth=prevMinWidth;
+    sw.style.transform=prevTransform;sw.style.height=prevHeight;
+    btn.textContent='이미지 저장';btn.disabled=false;
+  }
+}
+
+buildSwatches();buildBgSwatches();buildToggles();render();updateStrip();
+</script>
+</body>
+</html>
