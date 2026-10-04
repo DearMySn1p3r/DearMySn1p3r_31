@@ -237,7 +237,8 @@ const AXES=[['d','s'],['r','b'],['o','h']];
 
 /* Each item: [text, tags]. Tags are axis keys separated by spaces,
    or '@역할' for a role item (shown in front of the type label).
-   Item ids come from the universe id + position, so append new items at the end of a category. */
+   Item ids come from the universe id + position, so append new items at the end of a category.
+   To remove an item, set its tags to null instead of deleting the line. */
 const AUS=[
   {id:'sentinel',label:'센티넬버스',title:'Sentinel·verse',cats:[
     {title:'기본 설정',items:[
@@ -311,7 +312,7 @@ const AUS=[
       ['상대의 페로몬에만 반응하는 사람','b'],
     ]},
     {title:'관계 & 마킹',items:[
-      ['첫 히트에서 상대를 인식한 사람','b'],
+      ['첫 히트에서 상대를 인식한 사람',null],  // removed (kept so later ids don't shift)
       ['마킹에 저항하는 사람','s'],
       ['마킹을 원하지만 티 내지 않는 사람','h'],
       ['본딩 이후 독점욕이 강해지는 사람','b d'],
@@ -345,8 +346,9 @@ const AUS=[
 AUS.forEach(au=>au.cats.forEach((c,ci)=>{
   c.items=c.items.map(([t,tag],ii)=>{
     const id=`${au.id}-${ci}-${ii}`;
+    if(tag===null)return null;
     return tag.startsWith('@')?{id,t,role:tag.slice(1),tr:[]}:{id,t,tr:tag.split(' ')};
-  });
+  }).filter(Boolean);
 }));
 const itemsOf=au=>au.cats.flatMap(c=>c.items);
 
